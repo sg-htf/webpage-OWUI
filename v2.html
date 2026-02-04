@@ -1,0 +1,206 @@
+<script>
+  let pyetja = "";
+  let biseda = [
+    { teksti: "Sistemi lokal është gati. Si mund t'ju ndihmoj sot?" }
+  ];
+  let statusi = "Aktiv";
+
+  async function dergo() {
+    if (!pyetja.trim()) return;
+
+    biseda = [...biseda, { dërguesi: "Ti", teksti: pyetja }];
+    let query = pyetja;
+    pyetja = "";
+    statusi = "Duke përpunuar...";
+
+    try {
+      const response = await fetch('http://localhost:5000/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: query })
+      });
+      const data = await response.json();
+      biseda = [...biseda, { dërguesi: "AI", teksti: data.response }];
+    } catch (e) {
+      biseda = [...biseda, { teksti: "Serveri nuk u gjet. Kontrolloni lidhjen." }];
+    } finally {
+      statusi = "Aktiv";
+    }
+  }
+</script>
+
+<main>
+  <div class="app-container">
+    <header>
+      <div class="status-indicator">
+        <span class="pulse"></span> {statusi}
+      </div>
+      <h1>Mendoni lirshëm.</h1>
+      <p>
+        Platforma juaj private për inteligjencë artificiale. 
+        Çdo gjë përpunohet lokalisht, pa lënë gjurmë në internet.
+      </p>
+    </header>
+
+    <section class="chat-wrapper">
+      <div class="message-feed">
+        {#each biseda as msg}
+          <div class="msg-block">
+            {#if msg.dërguesi}
+              <span class="author">{msg.dërguesi}</span>
+            {/if}
+            <p class="content">{msg.teksti}</p>
+          </div>
+        {/each}
+      </div>
+
+      <div class="input-wrapper">
+        <input 
+          bind:value={pyetja} 
+          placeholder="Shkruaj një mesazh..." 
+          on:keydown={(e) => e.key === 'Enter' && dergo()}
+        />
+        <button on:click={dergo}>Dërgo</button>
+      </div>
+    </section>
+
+    <footer>
+      <p>Procesim Lokal • Siguri Absolute • 2026</p>
+    </footer>
+  </div>
+</main>
+
+<style>
+  :global(body) {
+    margin: 0;
+    padding: 0;
+    /* Ngjyra e re e sfondit: Një gri shumë e lehtë dhe e ngrohtë */
+    background-color: #f9f9f7; 
+    color: #1a1a1a;
+    font-family: 'Inter', -apple-system, sans-serif;
+  }
+
+  .app-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 100px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 70px;
+  }
+
+  /* Header */
+  header { text-align: left; }
+
+  .status-indicator {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+  }
+
+  .pulse {
+    width: 8px;
+    height: 8px;
+    background-color: #1a1a1a;
+    border-radius: 50%;
+  }
+
+  h1 {
+    font-size: 3.2rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -1.5px;
+    color: #1a1a1a;
+  }
+
+  p {
+    font-size: 1.15rem;
+    color: #555;
+    line-height: 1.6;
+    margin-top: 20px;
+    max-width: 550px;
+  }
+
+  /* Chat Section */
+  .chat-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .message-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 35px;
+  }
+
+  .msg-block {
+    border-left: 2px solid #e0e0de;
+    padding-left: 25px;
+  }
+
+  .author {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 8px;
+  }
+
+  .content {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+
+  /* Input */
+  .input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-top: 30px;
+    border-top: 1px solid #e0e0de;
+  }
+
+  input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    color: #1a1a1a;
+    outline: none;
+  }
+
+  input::placeholder { color: #ccc; }
+
+  button {
+    background: #1a1a1a;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: opacity 0.2s;
+  }
+
+  button:hover { opacity: 0.8; }
+
+  /* Footer */
+  footer {
+    border-top: 1px solid #e0e0de;
+    padding-top: 30px;
+    font-size: 0.75rem;
+    color: #bbb;
+    letter-spacing: 0.5px;
+  }
+</style>
