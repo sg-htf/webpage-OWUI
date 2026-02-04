@@ -1,0 +1,57 @@
+<script>
+  let pyetja = "";
+  let biseda = [
+    { teksti: "Sistemi lokal është gati. Si mund t'ju ndihmoj sot?" }
+  ];
+  let statusi = "Aktiv";
+
+  async function dergo() {
+    if (!pyetja.trim()) return;
+
+    biseda = [...biseda, { dërguesi: "Ti", teksti: pyetja }];
+    let query = pyetja;
+    pyetja = "";
+    statusi = "Duke përpunuar...";
+
+    try {
+      const response = await fetch('http://localhost:5000/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: query })
+      });
+      const data = await response.json();
+      biseda = [...biseda, { dërguesi: "AI", teksti: data.response }];
+    } catch (e) {
+      biseda = [...biseda, { teksti: "Serveri nuk u gjet. Kontrolloni lidhjen." }];
+    } finally {
+      statusi = "Aktiv";
+    }
+  }
+</script>
+
+<main>
+  <div class="app-container">
+    <header>
+      <div class="status-indicator">
+        <span class="pulse"></span> {statusi}
+      </div>
+      <h1>Mendoni lirshëm.</h1>
+      <p>
+        Platforma juaj private për inteligjencë artificiale. 
+        Çdo gjë përpunohet lokalisht, pa lënë gjurmë në internet.
+      </p>
+    </header>
+
+    <section class="chat-wrapper">
+      <div class="message-feed">
+        {#each biseda as msg}
+          <div class="msg-block">
+            {#if msg.dërguesi}
+              <span class="author">{msg.dërguesi}</span>
+            {/if}
+            <p class="content">{msg.teksti}</p>
+          </div>
+        {/each}
+      </div>
+
+      <div class="input-wrapper">
